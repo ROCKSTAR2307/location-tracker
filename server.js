@@ -18,8 +18,12 @@ app.get('/', (req, res) => {
 
 // Create logs directory if it doesn't exist
 const logsDir = path.join(__dirname, 'location_logs');
-if (!fs.existsSync(logsDir)) {
-    fs.mkdirSync(logsDir);
+try {
+    if (!fs.existsSync(logsDir)) {
+        fs.mkdirSync(logsDir, { recursive: true });
+    }
+} catch (err) {
+    console.log('Note: Using in-memory storage (logs directory not writable)');
 }
 
 // Generate log filename with date
@@ -40,8 +44,12 @@ function readLogs() {
 
 // Write logs
 function writeLogs(logs) {
-    const logFile = getLogFilename();
-    fs.writeFileSync(logFile, JSON.stringify(logs, null, 2), 'utf8');
+    try {
+        const logFile = getLogFilename();
+        fs.writeFileSync(logFile, JSON.stringify(logs, null, 2), 'utf8');
+    } catch (err) {
+        console.log('Warning: Could not write to file system');
+    }
 }
 
 app.get('/capture', (req, res) => {
