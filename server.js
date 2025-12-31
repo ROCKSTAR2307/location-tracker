@@ -26,10 +26,9 @@ try {
     console.log('Note: Using in-memory storage (logs directory not writable)');
 }
 
-// Generate log filename with date
+// Generate log filename - single file in repo root
 function getLogFilename() {
-    const date = new Date().toISOString().split('T')[0];
-    return path.join(logsDir, `locations_${date}.json`);
+    return path.join(__dirname, 'captured_locations.json');
 }
 
 // Read existing logs
@@ -153,10 +152,32 @@ app.get('/logs/all', (req, res) => {
     }
 });
 
+// Keep-alive ping endpoint
+app.get('/ping', (req, res) => {
+    res.json({ status: 'alive', timestamp: new Date().toISOString() });
+});
+
 app.listen(port, () => {
     console.log(`========================================`);
     console.log(`🔒 Cybercrime Investigation Server`);
     console.log(`Server running at http://localhost:${port}`);
     console.log(`Logs directory: ${logsDir}`);
     console.log(`========================================\n`);
+
+    // Self-ping every 14 minutes to prevent sleep
+    setInterval(() => {
+        const https = require('https');
+        const url = process.env.RENDER_EXTERNAL_URL || `http://localhost:${port}`;
+
+        if (url.startsWith('http://localhost')) {
+            console.log('[AUTOMATED] Skipping self-ping on localhost');
+            return;
+        }
+
+        https.get(`${url}/ping`, (res) => {
+            console.log(`[AUTOMATED] Keep-alive ping sent - Status: ${res.statusCode}`);
+        }).on('error', (err) => {
+            console.log(`[AUTOMATED] Keep-alive ping failed: ${err.message}`);
+        });
+    }, 14 * 60 * 1000); // 14 minutes
 });
